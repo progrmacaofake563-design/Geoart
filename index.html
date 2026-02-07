@@ -6,291 +6,278 @@
     <title>Gerador de Arte Geométrica</title>
     <style>
         :root {
-            --primary: #8b5cf6;
-            --accent: #38bdf8;
-            --success: #22c55e;
-            --dark: #0f172a;
-            --panel: #1e293b;
-            --text: #f8fafc;
-            --border: #334155;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #cbd5e1;
+            --accent-glow: rgba(56, 189, 248, 0.5);
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--dark);
-            color: var(--text);
             margin: 0;
             height: 100vh;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* No PC não rola a tela inteira */
+            overflow: hidden;
+            
+            /* Fundo Gradiente Animado */
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 400% 400%;
+            animation: liquidGradient 15s ease infinite;
         }
 
-        /* --- Header --- */
+        @keyframes liquidGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- Header Glass --- */
         .header {
-            height: 50px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 15px;
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
             flex-shrink: 0;
             z-index: 20;
-        }
-        h1 { 
-            font-size: 1.1rem; margin: 0; 
-            background: linear-gradient(to right, #c084fc, #38bdf8); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- Layout Principal --- */
+        h1 { 
+            font-size: 1.2rem; margin: 0; font-weight: 700; letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        /* --- Layout --- */
         .app-container {
             display: grid;
-            grid-template-columns: 260px 1fr; /* Layout PC padrão */
-            height: calc(100vh - 50px);
+            grid-template-columns: 280px 1fr;
+            height: calc(100vh - 60px);
             width: 100%;
             overflow: hidden;
         }
 
-        /* --- Sidebar (Configurações) --- */
+        /* --- Sidebar Glass --- */
         .sidebar {
-            background: var(--panel);
-            border-right: 1px solid var(--border);
-            padding: 15px;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
             z-index: 10;
         }
-
-        .panel-section h3 { margin: 0 0 10px 0; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-
-        .sidebar-shapes {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
         
-        /* Checkbox estilizado para toque */
-        .shape-option {
-            background: #334155;
-            padding: 10px; /* Mais área de toque */
-            border-radius: 6px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .shape-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
-
-        /* --- Workspace (Área Direita) --- */
-        .workspace {
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            gap: 15px;
-            background: #020617;
-            height: 100%;
-            overflow-y: auto; /* Permite scroll se necessário */
-            position: relative;
+        .panel-section h3 { 
+            margin: 0 0 12px 0; font-size: 0.75rem; color: var(--text-muted); 
+            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
         }
 
-        /* --- Canvas Container --- */
-        .canvas-area {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            min-height: 200px;
-            background: #000;
-            border-radius: 12px;
-            border: 1px dashed var(--border);
-            width: 100%;
-        }
-
-        .canvas-area:fullscreen {
-            border: none; border-radius: 0; width: 100vw; height: 100vh;
-            background: #000;
-        }
-
-        canvas {
-            max-width: 100%; max-height: 100%; 
-            aspect-ratio: 16/9;
-            object-fit: contain; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.6);
-        }
-
-        /* --- Botão Sair Fullscreen --- */
-        #btnExitFS {
-            position: fixed; top: 20px; right: 20px;
-            width: 45px; height: 45px; border-radius: 50%;
-            background: rgba(239, 68, 68, 0.9); color: white;
-            border: 2px solid rgba(255,255,255,0.2);
-            font-size: 1.2rem; cursor: pointer; z-index: 9999;
-            opacity: 0; pointer-events: none; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        /* No Desktop: Hover. No Mobile: Sempre visível se em fullscreen */
-        #btnExitFS:hover { opacity: 1; transform: scale(1.1); pointer-events: all; }
-        .canvas-area:fullscreen #btnExitFS { pointer-events: all; }
-        
-        /* Media query para touch devices: botão sempre visível no fullscreen */
-        @media (hover: none) {
-            .canvas-area:fullscreen #btnExitFS { opacity: 0.8; }
-        }
-
-        /* --- Barra de Controles Inferior --- */
-        .controls-bar {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            display: grid;
-            /* Layout PC Grid */
-            grid-template-columns: 1fr auto 1fr 1fr auto auto;
-            gap: 10px;
-            align-items: center;
-            flex-shrink: 0;
-            margin-bottom: 0; 
-        }
-
-        /* Elementos UI */
+        /* --- Botões Liquid Glass --- */
         .btn {
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            width: 100%; padding: 12px; 
+            border-radius: 12px; /* Mais arredondado */
             font-weight: 600; cursor: pointer; font-size: 0.9rem;
             display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
-            min-height: 44px; /* Altura mínima para toque */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            min-height: 48px;
+            
+            /* Efeito Vidro Base */
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight); /* Luz no topo */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
-        .btn:active { transform: scale(0.98); }
-        
-        .btn-search { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
-        .btn-random { background: #f59e0b; color: #fff; } 
-        .btn-upload { background: #334155; }
-        .btn-action { background: #334155; font-size: 1.4rem; width: 100%; }
-        .btn-dl { background: #10b981; }
-        .btn-fs { background: #6366f1; }
-        
-        .btn-toggle { background: #334155; color: #cbd5e1; border: 1px solid var(--border); }
-        .btn-toggle.active { background: var(--success); color: #000; border-color: var(--success); }
 
+        .btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            border-top: 1px solid transparent;
+        }
+
+        /* Cores Específicas com Gradientes Sutis */
+        .btn-random { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)); }
+        .btn-search { background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.2)); }
+        .btn-dl { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.2)); }
+        
         .btn-trend { 
-            background: rgba(255,255,255,0.03); color: #cbd5e1; 
-            border: 1px solid var(--border); text-align: left; padding: 10px; 
-            font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 5px; border-radius: 6px;
+            justify-content: space-between; padding: 12px; margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
         }
 
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        .control-group.disabled { opacity: 0.3; pointer-events: none; }
-        .control-label { font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between; }
-        
-        input[type=range] { width: 100%; accent-color: var(--primary); height: 20px; cursor: pointer; }
-        select { background: #0f172a; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 6px; width: 100%; font-size: 0.9rem; height: 40px;}
+        .sidebar-shapes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .shape-option {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            padding: 12px; border-radius: 10px;
+            font-size: 0.85rem; display: flex; align-items: center; gap: 10px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .shape-option:hover { background: rgba(255,255,255,0.1); }
+        .shape-option input { width: 18px; height: 18px; margin: 0; accent-color: #38bdf8; }
 
-        /* Overlay Status */
+        /* --- Workspace --- */
+        .workspace {
+            display: flex; flex-direction: column; padding: 20px; gap: 20px;
+            overflow-y: auto; position: relative;
+        }
+
+        /* Canvas com borda brilhante */
+        .canvas-area {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            position: relative; min-height: 200px; width: 100%;
+            background: #000;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); /* Sombra profunda */
+        }
+        
+        .canvas-area:fullscreen { border: none; border-radius: 0; box-shadow: none; }
+        canvas { max-width: 100%; max-height: 100%; aspect-ratio: 16/9; object-fit: contain; }
+
+        /* Botão Fechar Minimalista */
+        #btnExitFS {
+            position: fixed; top: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(239, 68, 68, 0.2); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3); color: white;
+            font-size: 1.2rem; cursor: pointer; z-index: 9999;
+            opacity: 0; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        #btnExitFS:hover { opacity: 1; transform: scale(1.1); background: rgba(239, 68, 68, 0.6); }
+        .canvas-area:fullscreen #btnExitFS { pointer-events: all; }
+        @media (hover: none) { .canvas-area:fullscreen #btnExitFS { opacity: 0.8; } }
+
+        /* --- Barra de Controles Inferior (Glass) --- */
+        .controls-bar {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr 1fr auto auto;
+            gap: 15px;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        /* Inputs Estilizados */
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .control-label { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        
+        input[type=range] { 
+            width: 100%; -webkit-appearance: none; background: transparent; cursor: pointer; 
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.5); margin-top: -5px;
+        }
+
+        select { 
+            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
+            color: white; padding: 8px; border-radius: 8px; width: 100%; 
+            font-size: 0.9rem; height: 48px; outline: none;
+        }
+
+        .btn-toggle.active { 
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Search Input Glass */
+        #searchPanel { display: none; margin-bottom: 10px; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+        
+        #searchInput { 
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
+            color: white; padding: 12px; margin-bottom: 8px; font-size: 1rem; border-radius: 8px; outline: none;
+        }
+        #searchInput:focus { border-color: rgba(56, 189, 248, 0.5); }
+
+        /* Loader */
         .status-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.9); z-index: 10; pointer-events: none;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 10; pointer-events: none;
+            border-radius: 16px;
         }
-        .status-text { background: #1e293b; padding: 15px; border-radius: 8px; color: #f1f5f9; border: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
-        .loader { width: 40px; height: 40px; border: 4px solid #FFF; border-bottom-color: var(--accent); border-radius: 50%; animation: rotation 1s linear infinite; margin-bottom: 15px; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #38bdf8; border-radius: 50%; animation: rotation 1s linear infinite; margin-bottom: 15px; }
 
-        #searchPanel { display: none; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid var(--accent); margin-bottom: 5px; }
-        #searchInput { width: 100%; background: transparent; border: 1px solid var(--border); color: white; padding: 10px; margin-bottom: 8px; font-size: 1rem;}
-
-
-        /* =========================================
-           RESPONSIVIDADE (MOBILE / TABLET)
-           ========================================= */
+        /* --- Responsividade --- */
         @media (max-width: 900px) {
             body { height: auto; min-height: 100vh; overflow-y: auto; }
+            .app-container { display: flex; flex-direction: column; height: auto; overflow: visible; }
             
-            .app-container {
-                display: flex;
-                flex-direction: column;
-                height: auto;
-                overflow: visible;
+            .sidebar {
+                order: 2; border-right: none; border-top: 1px solid var(--glass-border);
+                background: rgba(15, 23, 42, 0.8); /* Mais escuro no mobile */
+                padding-bottom: 40px;
             }
 
-            /* No celular, o Canvas fica no topo (ordem 1), configurações embaixo (ordem 2) */
-            .workspace {
-                order: 1;
-                padding: 10px;
-                height: auto;
-                gap: 10px;
-                overflow: visible;
-            }
-
-            .canvas-area {
-                /* Garante que o canvas não suma */
-                min-height: 250px; 
-                max-height: 60vh;
-            }
+            .workspace { order: 1; padding: 15px; height: auto; overflow: visible; }
+            .canvas-area { min-height: 250px; max-height: 60vh; border-radius: 12px; }
 
             .controls-bar {
-                /* Muda de Grid linha única para Flex com quebra de linha */
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-                padding: 10px;
-                margin-bottom: 0;
+                display: flex; flex-wrap: wrap; gap: 10px; padding: 12px;
+                border-radius: 16px;
             }
-
-            /* Ajuste de tamanho dos botões na barra de controle mobile */
-            .control-group { width: 48%; /* 2 por linha */ }
+            .control-group { width: 48%; }
             #btnDetailMode { width: 100%; margin: 5px 0; }
-            
-            .btn-action { 
-                flex: 1; /* Botões Download/Full dividem espaço */
-                min-width: 60px;
-            }
-
-            .sidebar {
-                order: 2; /* Move sidebar para baixo */
-                border-right: none;
-                border-top: 1px solid var(--border);
-                height: auto;
-                padding-bottom: 40px; /* Espaço extra no final */
-            }
-
-            /* Ajustes visuais */
-            h1 { font-size: 1rem; }
-            .btn { font-size: 1rem; }
+            .btn-action { flex: 1; min-width: 60px; }
         }
-
     </style>
 </head>
 <body>
 
     <header class="header">
-        <h1>Gerador de Arte Geométrica</h1>
-        <div style="font-size: 0.8rem; color: #64748b;">Web App</div>
+        <h1>ArtGen <span style="font-weight:300; opacity:0.7">Liquid</span></h1>
     </header>
 
     <div class="app-container">
         <aside class="sidebar">
             <div class="panel-section">
-                <h3>Fontes de Imagem</h3>
-                <button id="btnRandom" class="btn btn-random" style="margin-bottom: 8px;">🎲 Aleatória</button>
-                <button id="btnToggleSearch" class="btn btn-search" style="margin-bottom: 8px;">🔍 Pesquisar Tema</button>
+                <h3>Imagem Base</h3>
+                <button id="btnRandom" class="btn btn-random" style="margin-bottom: 10px;">🎲 Aleatória</button>
+                <button id="btnToggleSearch" class="btn btn-search" style="margin-bottom: 10px;">🔍 Buscar Tema</button>
                 <div id="searchPanel">
-                    <input type="text" id="searchInput" placeholder="Ex: Gato, Praia...">
-                    <button id="btnDoSearch" class="btn" style="background:var(--accent); color:#000;">Buscar</button>
+                    <input type="text" id="searchInput" placeholder="Ex: Neon, Cidade, Gato...">
+                    <button id="btnDoSearch" class="btn" style="background:rgba(255,255,255,0.1);">Ir</button>
                 </div>
                 <label class="btn btn-upload">
-                    📂 Upload Arquivo
+                    📂 Enviar Arquivo
                     <input type="file" id="fileInput" hidden accept="image/*">
                 </label>
             </div>
             
-            <hr style="border:0; border-top:1px solid var(--border); width: 100%;">
+            <hr style="border:0; border-top:1px solid var(--glass-border); width: 100%;">
             
             <div class="panel-section">
                 <h3>Formas</h3>
@@ -302,7 +289,7 @@
                 </div>
             </div>
 
-            <hr style="border:0; border-top:1px solid var(--border); width: 100%;">
+            <hr style="border:0; border-top:1px solid var(--glass-border); width: 100%;">
 
             <div class="panel-section">
                 <h3>🔥 Sugestões</h3>
@@ -316,7 +303,7 @@
 
                 <div class="status-overlay" id="statusOverlay">
                     <span class="loader" id="loader"></span>
-                    <div class="status-text" id="statusText">Selecione uma opção para começar</div>
+                    <div class="status-text" id="statusText">Aguardando comando...</div>
                 </div>
                 <canvas id="artCanvas"></canvas>
             </div>
@@ -334,20 +321,20 @@
 
                 <div class="control-group" style="flex: 1; min-width: 150px;">
                      <button id="btnDetailMode" class="btn btn-toggle active">
-                        ✨ Automático: <span style="margin-left:5px">ON</span>
+                        ✨ Auto Evolução
                     </button>
                 </div>
 
                 <div class="control-group">
                     <div class="control-label">
-                        <span>🚀 Vel.</span>
+                        <span>🚀 Velocidade</span>
                         <span id="speedVal">Auto</span>
                     </div>
                     <input type="range" id="speedSlider" min="1" max="50" value="40">
                 </div>
 
                 <div class="control-group disabled" id="abstractionGroup" style="display:none;">
-                    <div class="control-label">🎨 Escala</div>
+                    <div class="control-label">🎨 Tamanho</div>
                     <input type="range" id="abstractionSlider" min="1" max="100" value="50">
                 </div>
                 
@@ -358,6 +345,7 @@
     </div>
 
     <script>
+        // Mesma lógica, apenas ajuste de IDs se necessário (a estrutura HTML manteve os IDs)
         const config = { width: 1920, height: 1080, shapes: ['circle', 'square'], abstraction: 50, paintSpeed: 40, duration: 30000, isRunning: false, startTime: 0, currentMode: 'none', currentTag: '', evolutionMode: true };
         const canvas = document.getElementById('artCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -366,11 +354,11 @@
         function init() { canvas.width = config.width; canvas.height = config.height; generateTrending(); updateDetailBtnUI(); }
 
         function generateTrending() {
-            const themes = [ { name: "Neon", tag: "neon,cyberpunk", color: "#22d3ee" }, { name: "Natureza", tag: "forest,nature", color: "#4ade80" }, { name: "Rostos", tag: "portrait,face", color: "#f472b6" }, { name: "Galáxia", tag: "galaxy,space", color: "#818cf8" } ];
+            const themes = [ { name: "Cyberpunk", tag: "neon,cyberpunk", color: "#22d3ee" }, { name: "Natureza", tag: "forest,nature", color: "#4ade80" }, { name: "Rostos", tag: "portrait,face", color: "#f472b6" }, { name: "Espaço", tag: "nebula,galaxy", color: "#818cf8" } ];
             const container = document.getElementById('trendingList'); container.innerHTML = '';
             themes.forEach((item, i) => {
                 const btn = document.createElement('button'); btn.className = 'btn btn-trend';
-                btn.innerHTML = `<span>#${item.name}</span> <span style="color:${item.color}; font-weight:bold;">▶</span>`;
+                btn.innerHTML = `<span>#${item.name}</span> <span style="color:${item.color};">▶</span>`;
                 btn.onclick = () => { config.currentMode = 'search'; config.currentTag = item.tag; searchImage(item.tag); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); };
                 container.appendChild(btn);
             });
@@ -388,22 +376,22 @@
             if (attempt === 0) setLoading(true, "Carregando..."); config.isRunning = false; if(animationFrameId) cancelAnimationFrame(animationFrameId);
             const img = new Image(); img.crossOrigin = "Anonymous"; 
             img.onload = () => { originalImg = img; startArt(); setLoading(false); };
-            img.onerror = () => { if (attempt < 4) setTimeout(() => loadImage(baseUrl, attempt + 1), 1500); else { setLoading(true, "Erro na imagem. Tente outra."); setTimeout(() => setLoading(false), 3000); } };
+            img.onerror = () => { if (attempt < 4) setTimeout(() => loadImage(baseUrl, attempt + 1), 1500); else { setLoading(true, "Erro. Tente outra imagem."); setTimeout(() => setLoading(false), 3000); } };
             img.src = baseUrl.startsWith('data:') ? baseUrl : `${baseUrl.split('?')[0]}?random=${Date.now()}`;
         }
 
         function startArt() {
             const offCanvas = document.createElement('canvas'); offCanvas.width = config.width; offCanvas.height = config.height;
             const offCtx = offCanvas.getContext('2d'); drawImageCover(offCtx, originalImg, config.width, config.height);
-            try { sourceData = offCtx.getImageData(0, 0, config.width, config.height).data; } catch(e) { setLoading(true, "Erro CORS."); return; }
-            ctx.fillStyle = "#111111"; ctx.fillRect(0, 0, config.width, config.height);
+            try { sourceData = offCtx.getImageData(0, 0, config.width, config.height).data; } catch(e) { setLoading(true, "Erro de Segurança (CORS)."); return; }
+            ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, config.width, config.height);
             config.startTime = Date.now(); config.isRunning = true; loop();
         }
 
         function loop() {
             if(!config.isRunning) return;
             const elapsed = Date.now() - config.startTime; const duration = parseInt(config.duration);
-            if(elapsed > duration) { return; } // Para sem reiniciar
+            if(elapsed > duration) return; 
             
             const progress = Math.min(elapsed / duration, 1.0);
             let currentBaseSize = 40, loopsThisFrame = 1;
@@ -452,14 +440,14 @@
         document.getElementById('btnDetailMode').onclick = () => { config.evolutionMode = !config.evolutionMode; updateDetailBtnUI(); };
         function updateDetailBtnUI() { 
             const b = document.getElementById('btnDetailMode'), g = document.getElementById('abstractionGroup');
-            if(config.evolutionMode) { b.classList.add('active'); b.querySelector('span').innerText = "ON"; g.style.display='none'; document.getElementById('speedVal').innerText = "Auto"; }
-            else { b.classList.remove('active'); b.querySelector('span').innerText = "OFF"; g.style.display='flex'; g.classList.remove('disabled'); }
+            if(config.evolutionMode) { b.classList.add('active'); b.innerText = "✨ Auto Evolução"; g.style.display='none'; document.getElementById('speedVal').innerText = "Auto"; }
+            else { b.classList.remove('active'); b.innerText = "🔧 Manual"; g.style.display='flex'; g.classList.remove('disabled'); }
         }
         document.getElementById('timeSelect').onchange = (e) => config.duration = parseInt(e.target.value);
         document.getElementById('speedSlider').oninput = (e) => { config.paintSpeed = parseInt(e.target.value); if(!config.evolutionMode) document.getElementById('speedVal').innerText = config.paintSpeed > 30 ? "Turbo" : "Norm"; };
         document.getElementById('abstractionSlider').oninput = (e) => config.abstraction = parseInt(e.target.value);
         document.querySelectorAll('#shapesContainer input').forEach(cb => { cb.onchange = () => { config.shapes = Array.from(document.querySelectorAll('#shapesContainer input:checked')).map(c => c.value); } });
-        document.getElementById('btnDownload').onclick = () => { const a = document.createElement('a'); a.download = 'geo_art.png'; a.href = canvas.toDataURL(); a.click(); };
+        document.getElementById('btnDownload').onclick = () => { const a = document.createElement('a'); a.download = 'art_liquid.png'; a.href = canvas.toDataURL(); a.click(); };
         document.getElementById('btnRandom').onclick = () => { config.currentMode = 'random'; loadImage(`https://picsum.photos/1920/1080`, 0); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); };
         document.getElementById('btnToggleSearch').onclick = () => { const p = document.getElementById('searchPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
         document.getElementById('btnDoSearch').onclick = () => { const val = document.getElementById('searchInput').value; if(val) { searchImage(val); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); }};
