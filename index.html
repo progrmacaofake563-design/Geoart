@@ -3,296 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gerador de Arte Geométrica</title>
+    <title>Gerador de Arte iOS Style</title>
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-highlight: rgba(255, 255, 255, 0.3);
-            --text-main: #ffffff;
-            --text-muted: #cbd5e1;
-            --accent-glow: rgba(56, 189, 248, 0.5);
+            /* Paleta de Cores iOS Claro */
+            --bg-app: #f2f2f7; /* Fundo cinza claro padrão do iOS */
+            --glass-light: rgba(255, 255, 255, 0.65); /* Vidro claro para painéis */
+            --glass-heavy: rgba(255, 255, 255, 0.85); /* Vidro mais opaco para barras */
+            --border-light: rgba(0, 0, 0, 0.1); /* Bordas sutis */
+            --text-primary: #1c1c1e; /* Texto escuro principal */
+            --text-secondary: #8e8e93; /* Texto cinza secundário */
+            --accent-color: #007aff; /* Azul padrão do iOS */
+            --accent-danger: #ff3b30; /* Vermelho padrão do iOS */
+            --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.08); /* Sombra suave difusa */
+            --radius-xl: 24px; /* Bordas muito arredondadas */
+            --radius-l: 16px;
+            --radius-m: 12px;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
             margin: 0;
             height: 100vh;
-            color: var(--text-main);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            
-            /* Fundo Gradiente Animado */
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
-            background-size: 400% 400%;
-            animation: liquidGradient 15s ease infinite;
         }
 
-        @keyframes liquidGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* --- Header Glass --- */
+        /* --- Header Glass Claro --- */
         .header {
-            height: 60px;
+            height: 50px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center; /* Título centralizado estilo iOS */
             padding: 0 20px;
             flex-shrink: 0;
             z-index: 20;
             
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            background: var(--glass-light);
+            backdrop-filter: blur(20px); /* Efeito de vidro forte */
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            position: relative;
         }
 
         h1 { 
-            font-size: 1.2rem; margin: 0; font-weight: 700; letter-spacing: 0.5px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            font-size: 1.1rem; margin: 0; font-weight: 600; 
+            color: var(--text-primary);
         }
 
-        /* --- Layout --- */
+        /* --- Layout Principal --- */
         .app-container {
             display: grid;
             grid-template-columns: 280px 1fr;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 50px);
             width: 100%;
             overflow: hidden;
+            padding: 20px; /* Espaço ao redor do conteúdo */
+            gap: 20px;
         }
 
-        /* --- Sidebar Glass --- */
+        /* --- Sidebar (Configurações) --- */
         .sidebar {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(12px);
-            border-right: 1px solid var(--glass-border);
+            background: var(--glass-light);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-l);
+            border: 1px solid var(--border-light);
             padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
             z-index: 10;
+            box-shadow: var(--shadow-soft);
         }
         
         .panel-section h3 { 
-            margin: 0 0 12px 0; font-size: 0.75rem; color: var(--text-muted); 
-            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+            margin: 0 0 12px 0; font-size: 0.8rem; color: var(--text-secondary); 
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
         }
 
-        /* --- Botões Liquid Glass --- */
+        /* Botões e Opções estilo iOS */
         .btn {
-            width: 100%; padding: 12px; 
-            border-radius: 12px; /* Mais arredondado */
-            font-weight: 600; cursor: pointer; font-size: 0.9rem;
-            display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            min-height: 48px;
-            
-            /* Efeito Vidro Base */
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-top: 1px solid var(--glass-highlight); /* Luz no topo */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
-            backdrop-filter: blur(4px);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            width: 100%; padding: 12px; border: none; border-radius: var(--radius-m);
+            font-weight: 500; cursor: pointer; font-size: 0.95rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            color: var(--accent-color); background: rgba(0, 122, 255, 0.1); /* Fundo azul claro */
+            transition: all 0.2s ease;
+            min-height: 44px;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.4);
-        }
-
-        .btn:active {
-            transform: translateY(1px);
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
-            border-top: 1px solid transparent;
-        }
-
-        /* Cores Específicas com Gradientes Sutis */
-        .btn-random { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)); }
-        .btn-search { background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.2)); }
-        .btn-dl { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.2)); }
+        .btn:active { transform: scale(0.98); background: rgba(0, 122, 255, 0.2); }
         
-        .btn-trend { 
-            justify-content: space-between; padding: 12px; margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.03);
+        .btn-random { color: var(--text-primary); background: rgba(0,0,0,0.05); }
+        .btn-search { color: var(--text-primary); background: rgba(0,0,0,0.05); }
+        .btn-upload { color: var(--text-primary); background: rgba(0,0,0,0.05); }
+
+        .btn-toggle { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+        .btn-toggle.active { 
+            background: var(--accent-color); color: white; 
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
+        
+        .btn-action { 
+            background: rgba(0,0,0,0.05); color: var(--text-primary); font-size: 1.3rem; 
+            width: 50px; height: 50px; padding: 0; border-radius: 50%; /* Botões redondos */
+        }
+        .btn-dl { color: var(--accent-color); }
+        .btn-fs { color: var(--text-primary); }
+
+        .btn-trend { 
+            background: rgba(0,0,0,0.05); color: var(--text-primary); 
+            border: none; text-align: left; padding: 12px; 
+            font-size: 0.9rem; display: flex; justify-content: space-between; 
+            border-radius: var(--radius-m); margin-bottom: 8px;
+        }
+        .btn-trend span:last-child { color: var(--accent-color); }
 
         .sidebar-shapes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .shape-option {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            padding: 12px; border-radius: 10px;
-            font-size: 0.85rem; display: flex; align-items: center; gap: 10px; cursor: pointer;
-            transition: 0.2s;
+            background: rgba(0,0,0,0.05); padding: 12px; border-radius: var(--radius-m);
+            font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer;
+            color: var(--text-primary); transition: 0.2s;
         }
-        .shape-option:hover { background: rgba(255,255,255,0.1); }
-        .shape-option input { width: 18px; height: 18px; margin: 0; accent-color: #38bdf8; }
+        .shape-option:hover { background: rgba(0,0,0,0.08); }
+        .shape-option input { 
+            width: 20px; height: 20px; margin: 0; accent-color: var(--accent-color); 
+            border-radius: 4px;
+        }
 
-        /* --- Workspace --- */
+        /* Inputs */
+        #searchPanel { display: none; margin-bottom: 10px; }
+        #searchInput { 
+            width: 100%; background: rgba(0,0,0,0.05); border: none; 
+            color: var(--text-primary); padding: 12px; margin-bottom: 8px; 
+            font-size: 1rem; border-radius: var(--radius-m); outline: none;
+        }
+        #searchInput::placeholder { color: var(--text-secondary); }
+
+        /* --- Workspace e Canvas --- */
         .workspace {
-            display: flex; flex-direction: column; padding: 20px; gap: 20px;
-            overflow-y: auto; position: relative;
+            display: flex; flex-direction: column; gap: 20px;
+            height: 100%; position: relative; overflow: hidden;
+            padding: 0; /* Remover padding interno */
         }
 
-        /* Canvas com borda brilhante */
+        /* Canvas flutuante estilo "Card" */
         .canvas-area {
             flex: 1; display: flex; justify-content: center; align-items: center;
-            position: relative; min-height: 200px; width: 100%;
-            background: #000;
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); /* Sombra profunda */
+            position: relative; min-height: 0; width: 100%;
+            background: #fff; /* Fundo branco para a arte */
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
         }
-        
-        .canvas-area:fullscreen { border: none; border-radius: 0; box-shadow: none; }
+
+        .canvas-area:fullscreen { border: none; border-radius: 0; box-shadow: none; background: #000; }
         canvas { max-width: 100%; max-height: 100%; aspect-ratio: 16/9; object-fit: contain; }
 
-        /* Botão Fechar Minimalista */
+        /* Botão Sair Fullscreen estilo iOS (X redondo) */
         #btnExitFS {
-            position: fixed; top: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%;
-            background: rgba(239, 68, 68, 0.2); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3); color: white;
-            font-size: 1.2rem; cursor: pointer; z-index: 9999;
+            position: fixed; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--glass-heavy); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light); color: var(--text-primary);
+            font-size: 1.1rem; cursor: pointer; z-index: 9999;
             opacity: 0; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-soft);
         }
-        #btnExitFS:hover { opacity: 1; transform: scale(1.1); background: rgba(239, 68, 68, 0.6); }
-        .canvas-area:fullscreen #btnExitFS { pointer-events: all; }
-        @media (hover: none) { .canvas-area:fullscreen #btnExitFS { opacity: 0.8; } }
+        .canvas-area:fullscreen #btnExitFS { opacity: 1; }
 
-        /* --- Barra de Controles Inferior (Glass) --- */
+        /* --- Barra de Controles Inferior ("Dock" Flutuante) --- */
         .controls-bar {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 15px;
-            display: grid;
-            grid-template-columns: 1fr auto 1fr 1fr auto auto;
-            gap: 15px;
-            align-items: center;
-            flex-shrink: 0;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            /* Flutuando na parte inferior */
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: auto; min-width: 60%; max-width: 90%;
+            
+            background: var(--glass-heavy);
+            backdrop-filter: blur(30px); /* Blur intenso estilo Dock */
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-light);
+            border-radius: 30px; /* Bordas estilo pílula */
+            padding: 10px 20px;
+            
+            display: flex; justify-content: space-between; align-items: center; gap: 20px;
+            box-shadow: var(--shadow-soft);
+            z-index: 30;
         }
 
-        /* Inputs Estilizados */
-        .control-group { display: flex; flex-direction: column; gap: 8px; }
-        .control-label { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        /* Controles na Dock */
+        .control-group { display: flex; flex-direction: column; gap: 4px; align-items: center; flex: 1; }
+        .control-label { font-size: 0.7rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap;}
         
+        /* Sliders estilo iOS */
         input[type=range] { 
-            width: 100%; -webkit-appearance: none; background: transparent; cursor: pointer; 
+            width: 100%; max-width: 120px; -webkit-appearance: none; background: transparent; cursor: pointer; 
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;
+            width: 100%; height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.5); margin-top: -5px;
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin-top: -8px;
         }
 
+        /* Select estilo iOS */
         select { 
-            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
-            color: white; padding: 8px; border-radius: 8px; width: 100%; 
-            font-size: 0.9rem; height: 48px; outline: none;
+            background: rgba(0,0,0,0.05); border: none; 
+            color: var(--text-primary); padding: 6px 10px; border-radius: 8px; 
+            font-size: 0.85rem; outline: none; text-align: center;
         }
 
-        .btn-toggle.active { 
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
-            border-color: rgba(34, 197, 94, 0.5);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        /* Botão Central de Destaque (Auto Evolução) */
+        #btnDetailMode { 
+            width: auto; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; 
+            background: rgba(0,0,0,0.05); color: var(--text-primary);
+            display: flex; flex-direction: column; gap: 2px;
         }
-
-        /* Search Input Glass */
-        #searchPanel { display: none; margin-bottom: 10px; animation: slideDown 0.3s ease; }
-        @keyframes slideDown { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-        
-        #searchInput { 
-            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
-            color: white; padding: 12px; margin-bottom: 8px; font-size: 1rem; border-radius: 8px; outline: none;
+        #btnDetailMode.active { 
+            background: var(--accent-color); color: white; 
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
         }
-        #searchInput:focus { border-color: rgba(56, 189, 248, 0.5); }
+        #btnDetailMode span:last-child { font-size: 0.7rem; opacity: 0.8; }
 
-        /* Loader */
+        /* Status Overlay Claro */
         .status-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 10; pointer-events: none;
-            border-radius: 16px;
+            background: var(--glass-light); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: 10; pointer-events: none; border-radius: var(--radius-xl);
         }
-        .loader { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #38bdf8; border-radius: 50%; animation: rotation 1s linear infinite; margin-bottom: 15px; }
+        .status-text { color: var(--text-primary); font-weight: 500; }
+        .loader { 
+            width: 40px; height: 40px; border: 4px solid rgba(0,0,0,0.1); 
+            border-top-color: var(--accent-color); border-radius: 50%; 
+            animation: rotation 1s linear infinite; margin-bottom: 15px; 
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- Responsividade --- */
+        /* --- Responsividade (Mobile) --- */
         @media (max-width: 900px) {
             body { height: auto; min-height: 100vh; overflow-y: auto; }
-            .app-container { display: flex; flex-direction: column; height: auto; overflow: visible; }
+            .app-container { 
+                display: flex; flex-direction: column; height: auto; overflow: visible; 
+                padding: 15px; gap: 15px;
+            }
             
-            .sidebar {
-                order: 2; border-right: none; border-top: 1px solid var(--glass-border);
-                background: rgba(15, 23, 42, 0.8); /* Mais escuro no mobile */
-                padding-bottom: 40px;
-            }
+            /* Sidebar vai para baixo */
+            .sidebar { order: 2; height: auto; }
 
-            .workspace { order: 1; padding: 15px; height: auto; overflow: visible; }
-            .canvas-area { min-height: 250px; max-height: 60vh; border-radius: 12px; }
+            /* Workspace fica em cima */
+            .workspace { order: 1; height: auto; gap: 15px; }
+            .canvas-area { min-height: 300px; max-height: 60vh; border-radius: var(--radius-l); }
 
+            /* Barra de Controles vira uma barra fixa inferior no mobile */
             .controls-bar {
-                display: flex; flex-wrap: wrap; gap: 10px; padding: 12px;
-                border-radius: 16px;
+                position: fixed; bottom: 15px; left: 15px; right: 15px;
+                width: auto; max-width: none; transform: none;
+                padding: 10px 15px; gap: 10px;
+                justify-content: space-between;
+                border-radius: 24px;
             }
-            .control-group { width: 48%; }
-            #btnDetailMode { width: 100%; margin: 5px 0; }
-            .btn-action { flex: 1; min-width: 60px; }
+            
+            /* Ajustes para caber na barra mobile */
+            .control-label { display: none; } /* Esconde labels para economizar espaço */
+            input[type=range] { max-width: 80px; }
+            select { width: auto; padding: 6px; }
+            #btnDetailMode { padding: 8px 12px; font-size: 0.8rem; }
+            #btnDetailMode span:last-child { display: none; }
+            .btn-action { width: 40px; height: 40px; font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <h1>ArtGen <span style="font-weight:300; opacity:0.7">Liquid</span></h1>
+        <h1>GeoArt <span style="font-weight:300; color:var(--accent-color);">iOS</span></h1>
     </header>
 
     <div class="app-container">
         <aside class="sidebar">
             <div class="panel-section">
-                <h3>Imagem Base</h3>
-                <button id="btnRandom" class="btn btn-random" style="margin-bottom: 10px;">🎲 Aleatória</button>
-                <button id="btnToggleSearch" class="btn btn-search" style="margin-bottom: 10px;">🔍 Buscar Tema</button>
-                <div id="searchPanel">
-                    <input type="text" id="searchInput" placeholder="Ex: Neon, Cidade, Gato...">
-                    <button id="btnDoSearch" class="btn" style="background:rgba(255,255,255,0.1);">Ir</button>
+                <h3>Fonte da Imagem</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button id="btnRandom" class="btn btn-random" style="flex:1;">🎲 Aleatória</button>
+                    <label class="btn btn-upload" style="flex:1;">
+                        📂 Arquivo
+                        <input type="file" id="fileInput" hidden accept="image/*">
+                    </label>
                 </div>
-                <label class="btn btn-upload">
-                    📂 Enviar Arquivo
-                    <input type="file" id="fileInput" hidden accept="image/*">
-                </label>
+                <button id="btnToggleSearch" class="btn btn-search" style="margin-bottom: 10px;">🔍 Pesquisar Tema</button>
+                <div id="searchPanel">
+                    <input type="text" id="searchInput" placeholder="Ex: Praia, Pôr do sol, Abstrato...">
+                    <button id="btnDoSearch" class="btn" style="background:var(--accent-color); color:white;">Buscar</button>
+                </div>
             </div>
             
-            <hr style="border:0; border-top:1px solid var(--glass-border); width: 100%;">
+            <hr style="border:0; border-top:1px solid var(--border-light); width: 100%; margin:0;">
             
             <div class="panel-section">
-                <h3>Formas</h3>
+                <h3>Formas Geométricas</h3>
                 <div class="sidebar-shapes" id="shapesContainer">
-                    <label class="shape-option"><input type="checkbox" value="circle" checked> Bolas</label>
-                    <label class="shape-option"><input type="checkbox" value="square" checked> Cubos</label>
-                    <label class="shape-option"><input type="checkbox" value="triangle"> Triâng</label>
+                    <label class="shape-option"><input type="checkbox" value="circle" checked> Círculos</label>
+                    <label class="shape-option"><input type="checkbox" value="square" checked> Quadrados</label>
+                    <label class="shape-option"><input type="checkbox" value="triangle"> Triângulos</label>
                     <label class="shape-option"><input type="checkbox" value="line"> Linhas</label>
                 </div>
             </div>
 
-            <hr style="border:0; border-top:1px solid var(--glass-border); width: 100%;">
+            <hr style="border:0; border-top:1px solid var(--border-light); width: 100%; margin:0;">
 
             <div class="panel-section">
-                <h3>🔥 Sugestões</h3>
+                <h3>🔥 Tendências</h3>
                 <div id="trendingList"></div>
             </div>
         </aside>
@@ -303,49 +329,45 @@
 
                 <div class="status-overlay" id="statusOverlay">
                     <span class="loader" id="loader"></span>
-                    <div class="status-text" id="statusText">Aguardando comando...</div>
+                    <div class="status-text" id="statusText">Toque em uma opção para começar</div>
                 </div>
                 <canvas id="artCanvas"></canvas>
             </div>
 
             <div class="controls-bar">
                 <div class="control-group">
-                    <div class="control-label">⏱️ Duração</div>
+                    <div class="control-label">Duração</div>
                     <select id="timeSelect">
                         <option value="15000">15s</option>
                         <option value="30000" selected>30s</option>
-                        <option value="60000">1 min</option>
-                        <option value="120000">2 min</option>
+                        <option value="60000">1m</option>
                     </select>
                 </div>
 
-                <div class="control-group" style="flex: 1; min-width: 150px;">
-                     <button id="btnDetailMode" class="btn btn-toggle active">
-                        ✨ Auto Evolução
-                    </button>
-                </div>
+                <button id="btnDetailMode" class="btn btn-toggle active">
+                    <span>✨ Auto Evolução</span>
+                    <span>Ativado</span>
+                </button>
 
                 <div class="control-group">
-                    <div class="control-label">
-                        <span>🚀 Velocidade</span>
-                        <span id="speedVal">Auto</span>
-                    </div>
+                    <div class="control-label">Velocidade</div>
                     <input type="range" id="speedSlider" min="1" max="50" value="40">
                 </div>
 
                 <div class="control-group disabled" id="abstractionGroup" style="display:none;">
-                    <div class="control-label">🎨 Tamanho</div>
+                    <div class="control-label">Escala</div>
                     <input type="range" id="abstractionSlider" min="1" max="100" value="50">
                 </div>
                 
-                <button id="btnFullscreen" class="btn btn-action btn-fs">⛶</button>
-                <button id="btnDownload" class="btn btn-action btn-dl">💾</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btnFullscreen" class="btn btn-action btn-fs">⛶</button>
+                    <button id="btnDownload" class="btn btn-action btn-dl">↓</button>
+                </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Mesma lógica, apenas ajuste de IDs se necessário (a estrutura HTML manteve os IDs)
         const config = { width: 1920, height: 1080, shapes: ['circle', 'square'], abstraction: 50, paintSpeed: 40, duration: 30000, isRunning: false, startTime: 0, currentMode: 'none', currentTag: '', evolutionMode: true };
         const canvas = document.getElementById('artCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -354,11 +376,11 @@
         function init() { canvas.width = config.width; canvas.height = config.height; generateTrending(); updateDetailBtnUI(); }
 
         function generateTrending() {
-            const themes = [ { name: "Cyberpunk", tag: "neon,cyberpunk", color: "#22d3ee" }, { name: "Natureza", tag: "forest,nature", color: "#4ade80" }, { name: "Rostos", tag: "portrait,face", color: "#f472b6" }, { name: "Espaço", tag: "nebula,galaxy", color: "#818cf8" } ];
+            const themes = [ { name: "Natureza", tag: "nature,landscape" }, { name: "Urbano", tag: "city,architecture" }, { name: "Retrato", tag: "portrait,face" }, { name: "Abstrato", tag: "abstract,texture" } ];
             const container = document.getElementById('trendingList'); container.innerHTML = '';
             themes.forEach((item, i) => {
                 const btn = document.createElement('button'); btn.className = 'btn btn-trend';
-                btn.innerHTML = `<span>#${item.name}</span> <span style="color:${item.color};">▶</span>`;
+                btn.innerHTML = `<span>${item.name}</span> <span style="font-size:1.2rem;">›</span>`;
                 btn.onclick = () => { config.currentMode = 'search'; config.currentTag = item.tag; searchImage(item.tag); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); };
                 container.appendChild(btn);
             });
@@ -373,18 +395,19 @@
         }
 
         function loadImage(baseUrl, attempt) {
-            if (attempt === 0) setLoading(true, "Carregando..."); config.isRunning = false; if(animationFrameId) cancelAnimationFrame(animationFrameId);
+            if (attempt === 0) setLoading(true, "Carregando imagem..."); config.isRunning = false; if(animationFrameId) cancelAnimationFrame(animationFrameId);
             const img = new Image(); img.crossOrigin = "Anonymous"; 
             img.onload = () => { originalImg = img; startArt(); setLoading(false); };
-            img.onerror = () => { if (attempt < 4) setTimeout(() => loadImage(baseUrl, attempt + 1), 1500); else { setLoading(true, "Erro. Tente outra imagem."); setTimeout(() => setLoading(false), 3000); } };
+            img.onerror = () => { if (attempt < 3) setTimeout(() => loadImage(baseUrl, attempt + 1), 1500); else { setLoading(true, "Erro ao carregar. Tente novamente."); setTimeout(() => setLoading(false), 3000); } };
             img.src = baseUrl.startsWith('data:') ? baseUrl : `${baseUrl.split('?')[0]}?random=${Date.now()}`;
         }
 
         function startArt() {
             const offCanvas = document.createElement('canvas'); offCanvas.width = config.width; offCanvas.height = config.height;
             const offCtx = offCanvas.getContext('2d'); drawImageCover(offCtx, originalImg, config.width, config.height);
-            try { sourceData = offCtx.getImageData(0, 0, config.width, config.height).data; } catch(e) { setLoading(true, "Erro de Segurança (CORS)."); return; }
-            ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, config.width, config.height);
+            try { sourceData = offCtx.getImageData(0, 0, config.width, config.height).data; } catch(e) { setLoading(true, "Erro de segurança (CORS)."); return; }
+            // Fundo do canvas agora é branco para combinar com o tema claro
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, config.width, config.height);
             config.startTime = Date.now(); config.isRunning = true; loop();
         }
 
@@ -411,9 +434,15 @@
             for(let i=0; i < loopsThisFrame; i++) {
                 const x = Math.floor(Math.random() * config.width), y = Math.floor(Math.random() * config.height);
                 const idx = (y * config.width + x) * 4;
-                if(sourceData[idx+3] < 20) continue;
+                // Ajuste para ignorar pixels muito claros (quase brancos) se o fundo for branco, 
+                // para que o desenho não "suma" no fundo.
+                if(sourceData[idx] > 240 && sourceData[idx+1] > 240 && sourceData[idx+2] > 240) continue;
+                
                 const naturalJitter = 0.6 + (Math.random() * 0.8);
-                const finalSize = currentBaseSize * (0.8 + (sourceData[idx] + sourceData[idx+1] + sourceData[idx+2]) / 765 * 0.4) * naturalJitter;
+                // Invertendo a lógica de tamanho baseada na luminosidade para fundo claro:
+                // Cores mais escuras geram formas maiores.
+                const brightness = (sourceData[idx] + sourceData[idx+1] + sourceData[idx+2]) / 765;
+                const finalSize = currentBaseSize * (0.8 + (1 - brightness) * 0.5) * naturalJitter;
                 
                 ctx.fillStyle = ctx.strokeStyle = `rgb(${sourceData[idx]},${sourceData[idx+1]},${sourceData[idx+2]})`;
                 drawShape(x, y, finalSize, shapesToUse[Math.floor(Math.random() * shapesToUse.length)]);
@@ -440,19 +469,20 @@
         document.getElementById('btnDetailMode').onclick = () => { config.evolutionMode = !config.evolutionMode; updateDetailBtnUI(); };
         function updateDetailBtnUI() { 
             const b = document.getElementById('btnDetailMode'), g = document.getElementById('abstractionGroup');
-            if(config.evolutionMode) { b.classList.add('active'); b.innerText = "✨ Auto Evolução"; g.style.display='none'; document.getElementById('speedVal').innerText = "Auto"; }
-            else { b.classList.remove('active'); b.innerText = "🔧 Manual"; g.style.display='flex'; g.classList.remove('disabled'); }
+            const spanStatus = b.querySelector('span:last-child');
+            if(config.evolutionMode) { b.classList.add('active'); spanStatus.innerText = "Ativado"; g.style.display='none'; }
+            else { b.classList.remove('active'); spanStatus.innerText = "Manual"; g.style.display='flex'; g.classList.remove('disabled'); }
         }
         document.getElementById('timeSelect').onchange = (e) => config.duration = parseInt(e.target.value);
-        document.getElementById('speedSlider').oninput = (e) => { config.paintSpeed = parseInt(e.target.value); if(!config.evolutionMode) document.getElementById('speedVal').innerText = config.paintSpeed > 30 ? "Turbo" : "Norm"; };
+        document.getElementById('speedSlider').oninput = (e) => { config.paintSpeed = parseInt(e.target.value); };
         document.getElementById('abstractionSlider').oninput = (e) => config.abstraction = parseInt(e.target.value);
         document.querySelectorAll('#shapesContainer input').forEach(cb => { cb.onchange = () => { config.shapes = Array.from(document.querySelectorAll('#shapesContainer input:checked')).map(c => c.value); } });
-        document.getElementById('btnDownload').onclick = () => { const a = document.createElement('a'); a.download = 'art_liquid.png'; a.href = canvas.toDataURL(); a.click(); };
+        document.getElementById('btnDownload').onclick = () => { const a = document.createElement('a'); a.download = 'geo_art_ios.png'; a.href = canvas.toDataURL(); a.click(); };
         document.getElementById('btnRandom').onclick = () => { config.currentMode = 'random'; loadImage(`https://picsum.photos/1920/1080`, 0); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); };
         document.getElementById('btnToggleSearch').onclick = () => { const p = document.getElementById('searchPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
         document.getElementById('btnDoSearch').onclick = () => { const val = document.getElementById('searchInput').value; if(val) { searchImage(val); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); }};
         document.getElementById('searchInput').onkeypress = (e) => { if(e.key === 'Enter') { const val = document.getElementById('searchInput').value; if(val) { searchImage(val); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); } } };
-        document.getElementById('fileInput').onchange = (e) => { const f = e.target.files[0]; if(f) { config.currentMode = 'upload'; setLoading(true, "Lendo..."); const r = new FileReader(); r.onload = (evt) => { loadImage(evt.target.result, 0); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); }; r.readAsDataURL(f); } };
+        document.getElementById('fileInput').onchange = (e) => { const f = e.target.files[0]; if(f) { config.currentMode = 'upload'; setLoading(true, "Lendo arquivo..."); const r = new FileReader(); r.onload = (evt) => { loadImage(evt.target.result, 0); if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'}); }; r.readAsDataURL(f); } };
 
         init();
     </script>
