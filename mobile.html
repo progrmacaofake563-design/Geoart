@@ -255,7 +255,7 @@
             <button class="toggle-sidebar-btn" id="sidebarToggle">☰</button>
             <h1>GeoArt Mobile</h1>
         </div>
-        <div style="color: var(--accent); font-size: 0.8rem;">v2.0</div>
+        <div style="color: var(--accent); font-size: 0.8rem;">v2.1</div>
     </header>
 
     <div class="app-container" id="appGrid">
@@ -301,6 +301,7 @@
                 <div class="sidebar-shapes" id="shapesContainer">
                     <label class="shape-option"><input type="checkbox" value="circle" checked> Bolas</label>
                     <label class="shape-option"><input type="checkbox" value="square" checked> Cubos</label>
+                    <label class="shape-option"><input type="checkbox" value="triangle"> Triângulos</label>
                     <label class="shape-option"><input type="checkbox" value="line"> Linhas</label>
                 </div>
                 <button id="btnOpenCreator" class="btn btn-create" style="width:100%;">✏️ Desenhar Forma</button>
@@ -337,6 +338,8 @@
                     <select id="timeSelect">
                         <option value="15000">15s</option>
                         <option value="30000" selected>30s</option>
+                        <option value="60000">1 min</option>
+                        <option value="90000">1m 30s</option>
                         <option value="9999999">Infinito</option>
                     </select>
                 </div>
@@ -575,6 +578,16 @@
             else if(s === 'square') { 
                 ctx.save(); ctx.translate(x, y); ctx.rotate(angle); 
                 ctx.fillRect(-size/2, -size/2, size, size); ctx.restore(); 
+            }
+            else if(s === 'triangle') {
+                ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.moveTo(0, -size/1.5); // Topo
+                ctx.lineTo(size/1.5, size/1.5); // Canto Direito Baixo
+                ctx.lineTo(-size/1.5, size/1.5); // Canto Esquerdo Baixo
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
             }
             else if(s === 'line') { 
                 ctx.lineWidth = Math.max(1, size/5); 
