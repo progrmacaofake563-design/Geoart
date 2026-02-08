@@ -361,6 +361,19 @@
                     <input type="checkbox" id="flowFieldCheck"> 
                     <span>🌊 Flow Field (Seguir bordas)</span>
                 </label>
+                 
+                <div class="control-group" style="margin-bottom: 10px;">
+    <div class="control-label">
+        <span>💧 Opacidade (Aquarela)</span>
+        <span id="alphaVal">100%</span>
+    </div>
+    <input type="range" id="alphaSlider" min="1" max="100" value="100">
+</div>
+
+<label class="shape-option" style="margin-bottom: 15px;">
+    <input type="checkbox" id="glowCheck"> 
+    <span>✨ Ativar Brilho (Glow)</span>
+</label>
                 
                 <div class="control-label" style="margin-top: 5px;">🎨 Paleta de Cores</div>
                 <select id="colorPaletteSelect" style="margin-bottom: 10px;">
@@ -457,7 +470,9 @@
             retryCount: 0, maxRetries: 10,
             useFlowField: false,
             colorPalette: 'original',
-            flowAngles: null 
+            flowAngles: null,
+            globalAlpha: 1.0,
+            useGlow: false
         };
         
         const customShapesRegistry = {}; 
@@ -685,10 +700,20 @@
                 const finalSize = currentBaseSize * (0.8 + (brightness / 255) * 0.4) * naturalJitter;
                 
                 const r = sourceData[idx], g = sourceData[idx+1], b = sourceData[idx+2];
-                
-                const colorStr = getPaletteColor(r,g,b);
-                ctx.fillStyle = colorStr;
-                ctx.strokeStyle = colorStr;
+const colorStr = getPaletteColor(r,g,b);
+
+// --- NOVA LÓGICA DE TRANSPARÊNCIA ---
+ctx.globalAlpha = config.globalAlpha; 
+ctx.fillStyle = colorStr;
+ctx.strokeStyle = colorStr;
+
+// --- NOVA LÓGICA DE BRILHO (NEON) ---
+if (config.useGlow) {
+    ctx.shadowBlur = finalSize * 1.5; 
+    ctx.shadowColor = colorStr;
+} else {
+    ctx.shadowBlur = 0;
+}
 
                 let angle = 0;
                 if (config.useFlowField) {
@@ -887,60 +912,118 @@
             reader.readAsDataURL(file);
         };
 
-        // NOVA FUNÇÃO: Scanner Radial (muito mais robusto que o anterior)
-        function radialScanImage(img) {
-            resetCreator();
-            const w = 150, h = 150; 
-            const tempC = document.createElement('canvas');
-            tempC.width = w; tempC.height = h;
-            const tempCtx = tempC.getContext('2d');
-            
-            // Desenha imagem centralizada
-            const scale = Math.min(w/img.width, h/img.height) * 0.85;
-            const dw = img.width * scale, dh = img.height * scale;
-            const dx = (w-dw)/2, dy = (h-dh)/2;
-            tempCtx.drawImage(img, dx, dy, dw, dh);
-            
-            const data = tempCtx.getImageData(0, 0, w, h).data;
-            const cx = w/2, cy = h/2;
-            let points = [];
-            
-            // Dispara 72 raios (um a cada 5 graus)
-            const rayCount = 72; 
-            for (let i = 0; i < rayCount; i++) {
-                const angle = (i / rayCount) * Math.PI * 2;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
-                
-                // Vai do centro para fora
-                let lastValidX = cx;
-                let lastValidY = cy;
-                
-                // Escaneia do centro até a borda
-                for (let r = 0; r < w/2; r++) {
-                    const tx = Math.floor(cx + cos * r);
-                    const ty = Math.floor(cy + sin * r);
-                    
-                    if (tx < 0 || tx >= w || ty < 0 || ty >= h) break;
-                    
-                    const idx = (ty * w + tx) * 4;
-                    // Se o pixel não é transparente
-                    if (data[idx+3] > 40) { 
-                        lastValidX = tx;
-                        lastValidY = ty;
-                    }
-                }
-                
-                // Normaliza para o canvas de 400px
-                points.push({
-                    x: lastValidX * (400/w),
-                    y: lastValidY * (400/h)
-                });
-            }
+       // Substitua a função radialScanImage antiga por esta versão melhorada
+function radialScanImage(img) {
+    resetCreator();
+    
+    // 1. Preparação: Desenhamos em um canvas menor para "suavizar" imperfeições naturais
+    // Um tamanho de 200x200 é um bom equilíbrio entre detalhe e performance
+    const w = 200, h = 200; 
+    const tempC = document.createElement('canvas');
+    tempC.width = w; tempC.height = h;
+    const tempCtx = tempC.getContext('2d');
+    
+    // Centraliza e desenha a imagem (mantendo proporção)
+    const scale = Math.min(w/img.width, h/img.height) * 0.8; // 0.8 para dar margem
+    const dw = img.width * scale, dh = img.height * scale;
+    const dx = (w-dw)/2, dy = (h-dh)/2;
+    tempCtx.drawImage(img, dx, dy, dw, dh);
+    
+    const imgData = tempCtx.getImageData(0, 0, w, h);
+    const data = imgData.data;
+    
+    // Função auxiliar para verificar se um pixel é sólido
+    const isSolid = (x, y) => {
+        if (x < 0 || y < 0 || x >= w || y >= h) return false;
+        return data[(y * w + x) * 4 + 3] > 40; // Alpha threshold
+    };
 
-            drawnPoints = points;
-            redrawFromPoints();
+    // 2. Encontrar o ponto de partida (primeiro pixel sólido vindo de cima para a esquerda)
+    let startX = -1, startY = -1;
+    outerLoop:
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            if (isSolid(x, y)) {
+                startX = x;
+                startY = y;
+                break outerLoop;
+            }
         }
+    }
+
+    if (startX === -1) { alert("Imagem vazia ou transparente demais."); return; }
+
+    // 3. Algoritmo de Rastreamento de Borda (Moore-Neighbor Tracing)
+    let points = [];
+    let cx = startX, cy = startY;
+    
+    // Direções: N, NE, E, SE, S, SW, W, NW (sentido horário)
+    // Offset X e Y para cada direção
+    const dirs = [
+        {x: 0, y: -1}, {x: 1, y: -1}, {x: 1, y: 0}, {x: 1, y: 1},
+        {x: 0, y: 1}, {x: -1, y: 1}, {x: -1, y: 0}, {x: -1, y: -1}
+    ];
+    
+    // Começamos vindo do "Oeste" (West) já que encontramos o pixel varrendo da esquerda
+    let backtrackVal = 6; // 6 = West (índice no array dirs)
+    
+    // Limite de segurança para evitar loops infinitos em formas complexas
+    let maxIter = w * h; 
+    
+    do {
+        points.push({ x: cx, y: cy });
+        
+        // Procura o próximo pixel de borda em sentido horário
+        let foundNext = false;
+        for (let i = 0; i < 8; i++) {
+            // Começa a procurar a partir da direção de onde viemos (backtrack)
+            const idx = (backtrackVal + 1 + i) % 8; 
+            const nx = cx + dirs[idx].x;
+            const ny = cy + dirs[idx].y;
+            
+            if (isSolid(nx, ny)) {
+                cx = nx;
+                cy = ny;
+                // A nova direção de backtrack é o oposto da atual (aponta para o pixel anterior)
+                // Mas para o algoritmo Moore, ajustamos para começar a busca no vizinho anterior
+                backtrackVal = (idx + 4) % 8; 
+                foundNext = true;
+                break;
+            }
+        }
+        
+        if (!foundNext) break; // Pixel isolado
+        maxIter--;
+        
+    } while ((cx !== startX || cy !== startY) && maxIter > 0);
+
+    // 4. Simplificação e Normalização (Douglas-Peucker Simplificado)
+    // Isso remove pixels muito próximos ou em linha reta para reduzir a contagem de pontos
+    const simplifiedPoints = [];
+    const minDistance = 2; // Distância mínima em pixels para criar um novo vértice
+    
+    if(points.length > 0) {
+        simplifiedPoints.push(points[0]);
+        for(let i = 1; i < points.length; i++) {
+            const last = simplifiedPoints[simplifiedPoints.length - 1];
+            const curr = points[i];
+            const dist = Math.hypot(curr.x - last.x, curr.y - last.y);
+            
+            // Só adiciona se estiver longe o suficiente
+            if(dist > minDistance) {
+                simplifiedPoints.push(curr);
+            }
+        }
+    }
+
+    // 5. Mapear de volta para o tamanho do Canvas do Criador (400x400)
+    drawnPoints = simplifiedPoints.map(p => ({
+        x: p.x * (400/w),
+        y: p.y * (400/h)
+    }));
+
+    redrawFromPoints();
+}
 
         function redrawFromPoints() {
             if(drawnPoints.length < 2) return;
@@ -1053,6 +1136,14 @@
 
         document.getElementById('btnOpenCreator').onclick = () => toggleCreator(true);
 
+        document.getElementById('alphaSlider').oninput = (e) => { 
+    const val = parseInt(e.target.value);
+    config.globalAlpha = val / 100;
+    document.getElementById('alphaVal').innerText = val + "%";
+};
+document.getElementById('glowCheck').onchange = (e) => {
+    config.useGlow = e.target.checked;
+};
         init();
     </script>
 </body>
