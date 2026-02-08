@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecionando...</title>
+    <script>
+        // Verifica se é dispositivo móvel
+        function checkDevice() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
+            
+            if (isMobile) {
+                window.location.href = "mobile.html";
+            } else {
+                window.location.href = "pc.html";
+            }
+        }
+        checkDevice();
+    </script>
+    <style>
+        body { background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+    <p>Carregando a melhor versão para seu dispositivo...</p>
+</body>
+</html>
