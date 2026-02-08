@@ -1,557 +1,415 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gerador de Arte Geométrica</title>
-    <style>
-        :root {
-            --primary: #8b5cf6;
-            --accent: #38bdf8;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --dark: #0f172a;
-            --panel: #1e293b;
-            --text: #f8fafc;
-            --border: #334155;
-            --disabled: #475569;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Arte Geométrica</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --accent: #38bdf8;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --panel: #1e293b;
+            --text: #f8fafc;
+            --border: #334155;
+            --disabled: #475569;
+        }
 
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; user-select: none; }
 
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--dark);
-            color: var(--text);
-            margin: 0;
-            height: 100vh; /* Fallback */
-            height: 100dvh; /* Dynamic Viewport Height for Mobile */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-        /* --- Header & Mobile Menu Btn --- */
-        .header {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-            z-index: 50;
-        }
-        
-        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        h1 { 
+            font-size: 1.2rem; margin: 0; 
+            background: linear-gradient(to right, #c084fc, #38bdf8); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
 
-        #btnMobileMenu {
-            display: none;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
+        .app-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            height: calc(100vh - 50px);
+            width: 100%;
+        }
 
-        h1 { 
-            font-size: 1.1rem; margin: 0; 
-            background: linear-gradient(to right, #c084fc, #38bdf8); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .sidebar {
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel-section h3 { margin: 0 0 10px 0; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- Layout Grid --- */
-        .app-container {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            height: calc(100dvh - 50px);
-            width: 100%;
-            position: relative;
-        }
+        .sidebar-shapes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .shape-option {
+            background: #334155;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .shape-option:hover { background: #475569; }
+        .shape-option input { margin: 0; accent-color: var(--accent); cursor: pointer; }
 
-        /* --- Sidebar --- */
-        .sidebar {
-            background: var(--panel);
-            border-right: 1px solid var(--border);
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 40;
-            transition: transform 0.3s ease;
-        }
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            gap: 15px;
+            background: #020617;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
 
-        /* Mobile Overlay Background */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 30;
-            backdrop-filter: blur(2px);
-        }
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 0;
+            background: #000;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+            transition: all 0.3s ease;
+        }
 
-        .panel-section h3 { margin: 0 0 10px 0; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .canvas-area:fullscreen {
+            border: none; border-radius: 0; width: 100vw; height: 100vh;
+            background: #000; display: flex; align-items: center; justify-content: center;
+        }
 
-        .sidebar-shapes {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .shape-option {
-            background: #334155;
-            padding: 10px; /* Bigger touch target */
-            border-radius: 6px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .shape-option:active { background: #475569; }
-        .shape-option input { margin: 0; accent-color: var(--accent); cursor: pointer; transform: scale(1.2); }
+        #btnExitFS {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 9999;
+            opacity: 0; 
+            transition: opacity 0.3s ease, transform 0.2s;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
 
-        /* --- Workspace --- */
-        .workspace {
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            gap: 15px;
-            background: #020617;
-            height: 100%;
-            overflow: hidden;
-            position: relative;
-        }
+        #btnExitFS:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
 
-        .canvas-area {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            min-height: 0;
-            background: #000;
-            border-radius: 12px;
-            border: 1px dashed var(--border);
-            transition: all 0.3s ease;
-        }
+        .canvas-area:not(:fullscreen) #btnExitFS {
+            display: none !important;
+        }
 
-        .canvas-area:fullscreen {
-            border: none; border-radius: 0; width: 100vw; height: 100vh;
-            background: #000; display: flex; align-items: center; justify-content: center;
-        }
+        canvas {
+            max-width: 100%; max-height: 100%; aspect-ratio: 16/9;
+            object-fit: contain; box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
 
-        #btnExitFS {
-            position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
-            border-radius: 50%; background: rgba(239, 68, 68, 0.9); color: white;
-            border: 2px solid rgba(255,255,255,0.2); font-size: 1.2rem; font-weight: bold;
-            cursor: pointer; z-index: 9999; opacity: 0; 
-            transition: opacity 0.3s ease, transform 0.2s;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-        }
-        #btnExitFS:hover, #btnExitFS:active { opacity: 1; transform: scale(1.1); }
-        .canvas-area:not(:fullscreen) #btnExitFS { display: none !important; }
+        .controls-bar {
+            height: auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr 1fr auto auto;
+            gap: 15px;
+            align-items: center;
+            flex-shrink: 0;
+            margin-bottom: 60px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
 
-        canvas {
-            max-width: 100%; max-height: 100%; 
-            object-fit: contain; box-shadow: 0 0 40px rgba(0,0,0,0.6);
-        }
+        .btn {
+            width: 100%; padding: 10px; border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
+        }
+        .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        
+        .btn-search { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
+        .btn-random { background: #f59e0b; color: #fff; } 
+        .btn-upload { background: #334155; }
+        
+        .btn-action { background: #334155; height: 100%; font-size: 1.2rem; width: 50px; }
+        .btn-dl { background: #10b981; }
+        .btn-fs { background: #6366f1; }
+        
+        .btn-toggle { background: #334155; color: #cbd5e1; border: 1px solid var(--border); }
+        .btn-toggle.active { background: var(--success); color: #000; border-color: var(--success); box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
 
-        /* --- Bottom Controls Bar --- */
-        .controls-bar {
-            height: auto;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            overflow-x: auto; /* Allow scroll on very small screens */
-        }
+        .btn-trend { 
+            background: rgba(255,255,255,0.03); color: #cbd5e1; 
+            border: 1px solid var(--border); text-align: left; padding: 8px; 
+            font-size: 0.8rem; display: flex; justify-content: space-between;
+        }
+        .btn-trend:hover { border-color: var(--accent); background: rgba(255,255,255,0.08); }
 
-        /* Controls styling */
-        .control-group { 
-            display: flex; flex-direction: column; gap: 4px; 
-            min-width: 80px; flex: 1;
-            transition: opacity 0.3s; 
-        }
-        .control-group.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
-        .control-label { font-size: 0.7rem; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 2px; }
-        
-        input[type=range] { width: 100%; accent-color: var(--primary); height: 20px; cursor: pointer; } /* Taller for touch */
-        
-        select { 
-            background: #0f172a; border: 1px solid var(--border); color: white; 
-            padding: 6px; border-radius: 4px; width: 100%; font-size: 0.85rem; height: 32px;
-        }
+        .control-group { display: flex; flex-direction: column; gap: 4px; transition: opacity 0.3s; }
+        .control-group.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
+        .control-label { font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between; }
+        input[type=range] { width: 100%; accent-color: var(--primary); height: 4px; cursor: pointer; }
+        select { background: #0f172a; border: 1px solid var(--border); color: white; padding: 4px; border-radius: 4px; width: 100%; font-size: 0.85rem;}
 
-        .btn {
-            padding: 12px; border: none; border-radius: 6px;
-            font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem;
-            display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
-        }
-        .btn:active { transform: scale(0.98); }
-        
-        .btn-search { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
-        .btn-random { background: #f59e0b; color: #fff; } 
-        .btn-upload { background: #334155; }
-        
-        /* Action buttons in bottom bar */
-        .actions-wrapper { display: flex; gap: 8px; }
-        .btn-action { background: #334155; height: 40px; width: 44px; font-size: 1.2rem; padding: 0; }
-        .btn-dl { background: #10b981; }
-        .btn-fs { background: #6366f1; }
-        
-        .btn-toggle { 
-            background: #334155; color: #cbd5e1; border: 1px solid var(--border); 
-            height: 40px; min-width: 120px; flex: 1;
-        }
-        .btn-toggle.active { background: var(--success); color: #000; border-color: var(--success); }
+        .status-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.9); z-index: 10;
+        }
+        .status-text { background: #1e293b; padding: 15px 25px; border-radius: 8px; color: #f1f5f9; border: 1px solid var(--border); text-align: center; }
+        .loader {
+            width: 40px; height: 40px; border: 4px solid #FFF; border-bottom-color: var(--accent);
+            border-radius: 50%; animation: rotation 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .btn-trend { 
-            background: rgba(255,255,255,0.03); color: #cbd5e1; 
-            border: 1px solid var(--border); text-align: left; padding: 12px; 
-            font-size: 0.85rem; display: flex; justify-content: space-between;
-        }
-        .btn-trend:active { border-color: var(--accent); background: rgba(255,255,255,0.1); }
+        #searchPanel { display: none; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid var(--accent); margin-bottom: 5px; }
+        #searchInput { width: 100%; background: transparent; border: 1px solid var(--border); color: white; padding: 8px; margin-bottom: 8px; font-size: 0.9rem;}
 
-        /* Status & Loader */
-        .status-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.9); z-index: 10;
-        }
-        .status-text { background: #1e293b; padding: 15px 25px; border-radius: 8px; color: #f1f5f9; border: 1px solid var(--border); text-align: center; font-size: 0.9rem;}
-        .loader {
-            width: 40px; height: 40px; border: 4px solid #FFF; border-bottom-color: var(--accent);
-            border-radius: 50%; animation: rotation 1s linear infinite; margin-bottom: 15px;
-        }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #searchPanel { display: none; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid var(--accent); margin-bottom: 5px; }
-        #searchInput { width: 100%; background: transparent; border: 1px solid var(--border); color: white; padding: 8px; margin-bottom: 8px; font-size: 0.9rem;}
-
-        /* --- RESPONSIVE / MOBILE STYLES --- */
-        @media (max-width: 850px) {
-            .app-container {
-                display: flex;
-                flex-direction: column;
-            }
-
-            #btnMobileMenu { display: block; }
-            
-            .sidebar {
-                position: fixed;
-                top: 50px; left: 0; bottom: 0;
-                width: 280px;
-                max-width: 80%;
-                transform: translateX(-100%); /* Hidden by default */
-                border-right: 1px solid var(--accent);
-                box-shadow: 10px 0 20px rgba(0,0,0,0.5);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .sidebar-overlay.open {
-                display: block;
-            }
-
-            .workspace {
-                padding: 10px;
-                gap: 10px;
-                height: 100%;
-            }
-            
-            .canvas-area {
-                border-radius: 8px;
-            }
-
-            .controls-bar {
-                padding: 8px;
-                gap: 8px;
-                display: grid;
-                grid-template-columns: 1fr 1fr; /* 2 columns layout for controls */
-                grid-template-areas: 
-                    "toggle toggle"
-                    "time speed"
-                    "scale scale"
-                    "actions actions";
-            }
-            
-            #btnDetailMode { grid-area: toggle; }
-            .control-group:nth-child(1) { grid-area: time; }
-            .control-group:nth-child(3) { grid-area: speed; }
-            #abstractionGroup { grid-area: scale; }
-            .actions-wrapper { grid-area: actions; display: flex; justify-content: flex-end; width: 100%; }
-            .actions-wrapper button { flex: 1; }
-        }
-
-        /* Very small screens */
-        @media (max-width: 380px) {
-            .header h1 { font-size: 1rem; }
-            .controls-bar { display: flex; flex-direction: column; overflow-y: auto; max-height: 40vh; }
-            .control-group, #btnDetailMode, .actions-wrapper { width: 100%; }
-        }
-
-    </style>
+    </style>
 </head>
 <body>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <header class="header">
+        <h1>Gerador de Arte Geométrica</h1>
+        <div style="font-size: 0.8rem; color: #64748b;">Aplicação Web</div>
+    </header>
 
-    <header class="header">
-        <div class="header-left">
-            <button id="btnMobileMenu">☰</button>
-            <h1>Gerador de Arte Geométrica</h1>
-        </div>
-        <div style="font-size: 0.7rem; color: #64748b;">Web App</div>
-    </header>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="panel-section">
+                <h3>Fontes de Imagem</h3>
+                <button id="btnRandom" class="btn btn-random" style="margin-bottom: 8px;">🎲 Aleatória</button>
+                <button id="btnToggleSearch" class="btn btn-search" style="margin-bottom: 8px;">🔍 Pesquisar Tema</button>
+                <div id="searchPanel">
+                    <input type="text" id="searchInput" placeholder="Ex: Gato, Praia, Neon...">
+                    <button id="btnDoSearch" class="btn" style="background:var(--accent); color:#000; padding: 5px;">Buscar Foto</button>
+                </div>
+                <label class="btn btn-upload">
+                    📂 Upload Arquivo
+                    <input type="file" id="fileInput" hidden accept="image/*">
+                </label>
+            </div>
+            <hr style="border:0; border-top:1px solid var(--border); width: 100%;">
+            <div class="panel-section">
+                <h3>Formas Geométricas</h3>
+                <div class="sidebar-shapes" id="shapesContainer">
+                    <label class="shape-option"><input type="checkbox" value="circle" checked> Círculos</label>
+                    <label class="shape-option"><input type="checkbox" value="square" checked> Quadrados</label>
+                    <label class="shape-option"><input type="checkbox" value="triangle"> Triângulos</label>
+                    <label class="shape-option"><input type="checkbox" value="line"> Linhas</label>
+                </div>
+            </div>
+            <hr style="border:0; border-top:1px solid var(--border); width: 100%;">
+            <div class="panel-section" style="flex: 1;">
+                <h3>🔥 Sugestões</h3>
+                <div id="trendingList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+        </aside>
 
-    <div class="app-container">
-        <aside class="sidebar" id="mainSidebar">
-            <div class="panel-section">
-                <h3>Fontes de Imagem</h3>
-                <button id="btnRandom" class="btn btn-random" style="margin-bottom: 8px;">🎲 Aleatória</button>
-                <button id="btnToggleSearch" class="btn btn-search" style="margin-bottom: 8px;">🔍 Pesquisar Tema</button>
-                <div id="searchPanel">
-                    <input type="text" id="searchInput" placeholder="Ex: Gato, Praia, Neon...">
-                    <button id="btnDoSearch" class="btn" style="background:var(--accent); color:#000; padding: 5px;">Buscar Foto</button>
-                </div>
-                <label class="btn btn-upload">
-                    📂 Upload Arquivo
-                    <input type="file" id="fileInput" hidden accept="image/*">
-                </label>
-            </div>
-            <hr style="border:0; border-top:1px solid var(--border); width: 100%;">
-            <div class="panel-section">
-                <h3>Formas Geométricas</h3>
-                <div class="sidebar-shapes" id="shapesContainer">
-                    <label class="shape-option"><input type="checkbox" value="circle" checked> Círculos</label>
-                    <label class="shape-option"><input type="checkbox" value="square" checked> Quadrados</label>
-                    <label class="shape-option"><input type="checkbox" value="triangle"> Triângulos</label>
-                    <label class="shape-option"><input type="checkbox" value="line"> Linhas</label>
-                </div>
-            </div>
-            <hr style="border:0; border-top:1px solid var(--border); width: 100%;">
-            <div class="panel-section" style="flex: 1;">
-                <h3>🔥 Sugestões</h3>
-                <div id="trendingList" style="display: flex; flex-direction: column; gap: 6px;"></div>
-            </div>
-        </aside>
+        <main class="workspace">
+            <div class="canvas-area" id="canvasContainer">
+                <button id="btnExitFS" title="Sair da Tela Cheia">✕</button>
 
-        <main class="workspace">
-            <div class="canvas-area" id="canvasContainer">
-                <button id="btnExitFS" title="Sair da Tela Cheia">✕</button>
+                <div class="status-overlay" id="statusOverlay">
+                    <span class="loader" id="loader"></span>
+                    <div class="status-text" id="statusText">Escolha uma opção à esquerda para começar</div>
+                </div>
+                <canvas id="artCanvas"></canvas>
+            </div>
 
-                <div class="status-overlay" id="statusOverlay">
-                    <span class="loader" id="loader"></span>
-                    <div class="status-text" id="statusText">Escolha uma opção no Menu para começar</div>
-                </div>
-                <canvas id="artCanvas"></canvas>
-            </div>
+            <div class="controls-bar">
+                <div class="control-group">
+                    <div class="control-label">⏱️ Duração</div>
+                    <select id="timeSelect">
+                        <option value="15000">15 Segundos</option>
+                        <option value="30000" selected>30 Segundos</option>
+                        <option value="60000">1 Minuto</option>
+                        <option value="120000">2 Minutos</option>
+                        <option value="180000">3 Minutos</option>
+                        <option value="240000">4 Minutos</option>
+                    </select>
+                </div>
 
-            <div class="controls-bar">
-                <button id="btnDetailMode" class="btn btn-toggle active" title="Controla o tamanho automaticamente">
-                    ✨ Modo Auto <span style="font-size: 0.7em; margin-left: 4px;">ON</span>
-                </button>
+                <button id="btnDetailMode" class="btn btn-toggle active" title="Controla o tamanho automaticamente">
+                    ✨ Modo Automático
+                    <span style="font-size: 0.7em;">LIGADO</span>
+                </button>
 
-                <div class="control-group">
-                    <div class="control-label">⏱️ Duração</div>
-                    <select id="timeSelect">
-                        <option value="15000">15s</option>
-                        <option value="30000" selected>30s</option>
-                        <option value="60000">1 Min</option>
-                        <option value="120000">2 Min</option>
-                        <option value="180000">3 Min</option>
-                    </select>
-                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>🚀 Velocidade</span>
+                        <span id="speedVal">Auto</span>
+                    </div>
+                    <input type="range" id="speedSlider" min="1" max="50" value="40">
+                </div>
 
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>🚀 Velocidade</span>
-                        <span id="speedVal">Auto</span>
-                    </div>
-                    <input type="range" id="speedSlider" min="1" max="50" value="40">
-                </div>
+                <div class="control-group disabled" id="abstractionGroup">
+                    <div class="control-label">🎨 Escala</div>
+                    <input type="range" id="abstractionSlider" min="1" max="100" value="50">
+                </div>
+                
+                <button id="btnFullscreen" class="btn btn-action btn-fs" title="Tela Cheia">⛶</button>
+                <button id="btnDownload" class="btn btn-action btn-dl" title="Salvar Arte">💾</button>
+            </div>
+        </main>
+    </div>
 
-                <div class="control-group disabled" id="abstractionGroup">
-                    <div class="control-label">🎨 Escala</div>
-                    <input type="range" id="abstractionSlider" min="1" max="100" value="50">
-                </div>
-                
-                <div class="actions-wrapper">
-                    <button id="btnFullscreen" class="btn btn-action btn-fs" title="Tela Cheia">⛶</button>
-                    <button id="btnDownload" class="btn btn-action btn-dl" title="Salvar Arte">💾</button>
-                </div>
-            </div>
-        </main>
-    </div>
+    <script>
+        const config = { width: 1920, height: 1080, shapes: ['circle', 'square'], abstraction: 50, paintSpeed: 40, duration: 30000, isRunning: false, startTime: 0, currentMode: 'none', currentTag: '', evolutionMode: true };
+        const canvas = document.getElementById('artCanvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let sourceData = null, animationFrameId = null, originalImg = null;
 
-    <script>
-        const config = { width: 1920, height: 1080, shapes: ['circle', 'square'], abstraction: 50, paintSpeed: 40, duration: 30000, isRunning: false, startTime: 0, currentMode: 'none', currentTag: '', evolutionMode: true };
-        const canvas = document.getElementById('artCanvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        let sourceData = null, animationFrameId = null, originalImg = null;
+        function init() { canvas.width = config.width; canvas.height = config.height; generateTrending(); updateDetailBtnUI(); }
 
-        // Mobile UI Logic
-        const btnMobileMenu = document.getElementById('btnMobileMenu');
-        const sidebar = document.getElementById('mainSidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        function generateTrending() {
+            const themes = [ { name: "Cyberpunk", tag: "cyberpunk,neon", color: "#22d3ee" }, { name: "Natureza", tag: "forest,nature", color: "#4ade80" }, { name: "Retrato", tag: "portrait,face", color: "#f472b6" }, { name: "Espaço", tag: "galaxy,nebula", color: "#818cf8" }, { name: "Arquitetura", tag: "architecture,city", color: "#fb923c" } ];
+            const container = document.getElementById('trendingList'); container.innerHTML = '';
+            themes.forEach((item, i) => {
+                const btn = document.createElement('button'); btn.className = 'btn btn-trend';
+                btn.innerHTML = `<span>#${i+1} ${item.name}</span> <span style="color:${item.color};">TOCAR</span>`;
+                btn.onclick = () => { config.currentMode = 'search'; config.currentTag = item.tag; searchImage(item.tag); };
+                container.appendChild(btn);
+            });
+        }
 
-        function toggleMenu() {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('open');
-        }
-        btnMobileMenu.onclick = toggleMenu;
-        sidebarOverlay.onclick = toggleMenu;
-        
-        // Auto-close menu on selection (optional but good UX)
-        function closeMenuOnAction() {
-            if(window.innerWidth <= 850) {
-                sidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('open');
-            }
-        }
+        function searchImage(keyword) { config.currentMode = 'search'; config.currentTag = keyword; loadImage(`https://loremflickr.com/1920/1080/${encodeURIComponent(keyword)}`, 0); }
 
-        function init() { canvas.width = config.width; canvas.height = config.height; generateTrending(); updateDetailBtnUI(); }
+        function setLoading(isLoading, text) {
+            const el = document.getElementById('statusOverlay');
+            if(isLoading) { el.style.display = 'flex'; document.getElementById('statusText').innerText = text; document.getElementById('loader').style.display = 'block'; } else { el.style.display = 'none'; }
+        }
 
-        function generateTrending() {
-            const themes = [ { name: "Cyberpunk", tag: "cyberpunk,neon", color: "#22d3ee" }, { name: "Natureza", tag: "forest,nature", color: "#4ade80" }, { name: "Retrato", tag: "portrait,face", color: "#f472b6" }, { name: "Espaço", tag: "galaxy,nebula", color: "#818cf8" }, { name: "Arquitetura", tag: "architecture,city", color: "#fb923c" } ];
-            const container = document.getElementById('trendingList'); container.innerHTML = '';
-            themes.forEach((item, i) => {
-                const btn = document.createElement('button'); btn.className = 'btn btn-trend';
-                btn.innerHTML = `<span>#${i+1} ${item.name}</span> <span style="color:${item.color};">TOCAR</span>`;
-                btn.onclick = () => { 
-                    closeMenuOnAction();
-                    config.currentMode = 'search'; config.currentTag = item.tag; searchImage(item.tag); 
-                };
-                container.appendChild(btn);
-            });
-        }
+        function loadImage(baseUrl, attempt) {
+            if (attempt === 0) setLoading(true, "Processando..."); config.isRunning = false; if(animationFrameId) cancelAnimationFrame(animationFrameId);
+            const img = new Image(); img.crossOrigin = "Anonymous"; 
+            img.onload = () => { originalImg = img; startArt(); setLoading(false); };
+            img.onerror = () => { if (attempt < 5) setTimeout(() => loadImage(baseUrl, attempt + 1), 1500); else { setLoading(true, "Erro ao carregar recurso."); setTimeout(nextImage, 1000); } };
+            img.src = baseUrl.startsWith('data:') ? baseUrl : `${baseUrl.split('?')[0]}?random=${Date.now()}`;
+        }
 
-        function searchImage(keyword) { 
-            closeMenuOnAction();
-            config.currentMode = 'search'; config.currentTag = keyword; 
-            loadImage(`https://loremflickr.com/1920/1080/${encodeURIComponent(keyword)}`, 0); 
-        }
+        function nextImage() { if (config.currentMode === 'search') searchImage(config.currentTag); else if (config.currentMode === 'random') document.getElementById('btnRandom').click(); else if (config.currentMode === 'upload') startArt(); }
 
-        function setLoading(isLoading, text) {
-            const el = document.getElementById('statusOverlay');
-            if(isLoading) { el.style.display = 'flex'; document.getElementById('statusText').innerText = text; document.getElementById('loader').style.display = 'block'; } else { el.style.display = 'none'; }
-        }
+        function startArt() {
+            const offCanvas = document.createElement('canvas'); offCanvas.width = config.width; offCanvas.height = config.height;
+            const offCtx = offCanvas.getContext('2d'); drawImageCover(offCtx, originalImg, config.width, config.height);
+            try { sourceData = offCtx.getImageData(0, 0, config.width, config.height).data; } catch(e) { setLoading(true, "Erro de Segurança (CORS)."); return; }
+            ctx.fillStyle = "#111111"; ctx.fillRect(0, 0, config.width, config.height);
+            config.startTime = Date.now(); config.isRunning = true; loop();
+        }
 
-        function loadImage(baseUrl, attempt) {
-            if (attempt === 0) setLoading(true, "Processando..."); config.isRunning = false; if(animationFrameId) cancelAnimationFrame(animationFrameId);
-            const img = new Image(); img.crossOrigin = "Anonymous"; 
-            img.onload = () => { originalImg = img; startArt(); setLoading(false); };
-            img.onerror = () => { if (attempt < 5) setTimeout(() => loadImage(baseUrl, attempt + 1), 1500); else { setLoading(true, "Erro ao carregar recurso."); setTimeout(nextImage, 1000); } };
-            img.src = baseUrl.startsWith('data:') ? baseUrl : `${baseUrl.split('?')[0]}?random=${Date.now()}`;
-        }
+        function loop() {
+            if(!config.isRunning) return;
+            const elapsed = Date.now() - config.startTime; const duration = parseInt(config.duration);
+            if(elapsed > duration) { nextImage(); return; }
+            
+            const progress = Math.min(elapsed / duration, 1.0);
+            let currentBaseSize = 40, loopsThisFrame = 1;
 
-        function nextImage() { if (config.currentMode === 'search') searchImage(config.currentTag); else if (config.currentMode === 'random') document.getElementById('btnRandom').click(); else if (config.currentMode === 'upload') startArt(); }
+            if (config.evolutionMode) {
+                const shrinkLimit = duration >= 120000 ? 0.4 : 0.6;
+                let sizeProgress = progress / shrinkLimit; if (sizeProgress > 1) sizeProgress = 1;
+                currentBaseSize = 40 * (3.5 * (1 - sizeProgress) + 0.1 * sizeProgress);
+                loopsThisFrame = Math.floor((config.paintSpeed / 10) * Math.pow(150 / currentBaseSize, 1.5) * 0.5);
+            } else {
+                currentBaseSize = map(config.abstraction, 1, 100, 5, 80); loopsThisFrame = config.paintSpeed;
+            }
+            
+            if (currentBaseSize < 2) currentBaseSize = 2; if (loopsThisFrame < 1) loopsThisFrame = 1; if (loopsThisFrame > 600) loopsThisFrame = 600;
 
-        function startArt() {
-            const offCanvas = document.createElement('canvas'); offCanvas.width = config.width; offCanvas.height = config.height;
-            const offCtx = offCanvas.getContext('2d'); drawImageCover(offCtx, originalImg, config.width, config.height);
-            try { sourceData = offCtx.getImageData(0, 0, config.width, config.height).data; } catch(e) { setLoading(true, "Erro de Segurança (CORS)."); return; }
-            ctx.fillStyle = "#111111"; ctx.fillRect(0, 0, config.width, config.height);
-            config.startTime = Date.now(); config.isRunning = true; loop();
-        }
+            let shapesToUse = config.shapes.length > 0 ? config.shapes : ['circle'];
+            for(let i=0; i < loopsThisFrame; i++) {
+                const x = Math.floor(Math.random() * config.width), y = Math.floor(Math.random() * config.height);
+                const idx = (y * config.width + x) * 4;
+                if(sourceData[idx+3] < 20) continue;
+                const naturalJitter = 0.6 + (Math.random() * 0.8);
+                const finalSize = currentBaseSize * (0.8 + (sourceData[idx] + sourceData[idx+1] + sourceData[idx+2]) / 765 * 0.4) * naturalJitter;
+                
+                ctx.fillStyle = ctx.strokeStyle = `rgb(${sourceData[idx]},${sourceData[idx+1]},${sourceData[idx+2]})`;
+                drawShape(x, y, finalSize, shapesToUse[Math.floor(Math.random() * shapesToUse.length)]);
+            }
+            animationFrameId = requestAnimationFrame(loop);
+        }
 
-        function loop() {
-            if(!config.isRunning) return;
-            const elapsed = Date.now() - config.startTime; const duration = parseInt(config.duration);
-            if(elapsed > duration) { nextImage(); return; }
-            
-            const progress = Math.min(elapsed / duration, 1.0);
-            let currentBaseSize = 40, loopsThisFrame = 1;
+        function drawShape(x, y, size, s) {
+            ctx.beginPath();
+            if(s === 'circle') { ctx.arc(x, y, size/2, 0, Math.PI*2); ctx.fill(); }
+            else if(s === 'square') { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.random()*Math.PI*0.2); ctx.rect(-size/2, -size/2, size, size); ctx.fill(); ctx.restore(); }
+            else if(s === 'triangle') { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.random()*Math.PI*0.5); const h = size * 0.866; ctx.moveTo(0, -h/2); ctx.lineTo(-size/2, h/2); ctx.lineTo(size/2, h/2); ctx.fill(); ctx.restore(); }
+            else if(s === 'line') { ctx.lineWidth = Math.max(1, size/4); const a = Math.random()*Math.PI*2; ctx.moveTo(x-Math.cos(a)*size, y-Math.sin(a)*size); ctx.lineTo(x+Math.cos(a)*size, y+Math.sin(a)*size); ctx.stroke(); }
+        }
 
-            if (config.evolutionMode) {
-                const shrinkLimit = duration >= 120000 ? 0.4 : 0.6;
-                let sizeProgress = progress / shrinkLimit; if (sizeProgress > 1) sizeProgress = 1;
-                currentBaseSize = 40 * (3.5 * (1 - sizeProgress) + 0.1 * sizeProgress);
-                loopsThisFrame = Math.floor((config.paintSpeed / 10) * Math.pow(150 / currentBaseSize, 1.5) * 0.5);
-            } else {
-                currentBaseSize = map(config.abstraction, 1, 100, 5, 80); loopsThisFrame = config.paintSpeed;
-            }
-            
-            if (currentBaseSize < 2) currentBaseSize = 2; if (loopsThisFrame < 1) loopsThisFrame = 1; if (loopsThisFrame > 600) loopsThisFrame = 600;
+        function drawImageCover(ctx, img, w, h) {
+            const r = Math.max(w / img.width, h / img.height);
+            ctx.drawImage(img, (w - img.width * r) / 2, (h - img.height * r) / 2, img.width * r, img.height * r);
+        }
+        function map(v, a, b, c, d) { return c + ((v-a)/(b-a)) * (d-c); }
 
-            let shapesToUse = config.shapes.length > 0 ? config.shapes : ['circle'];
-            for(let i=0; i < loopsThisFrame; i++) {
-                const x = Math.floor(Math.random() * config.width), y = Math.floor(Math.random() * config.height);
-                const idx = (y * config.width + x) * 4;
-                if(sourceData[idx+3] < 20) continue;
-                const naturalJitter = 0.6 + (Math.random() * 0.8);
-                const finalSize = currentBaseSize * (0.8 + (sourceData[idx] + sourceData[idx+1] + sourceData[idx+2]) / 765 * 0.4) * naturalJitter;
-                
-                ctx.fillStyle = ctx.strokeStyle = `rgb(${sourceData[idx]},${sourceData[idx+1]},${sourceData[idx+2]})`;
-                drawShape(x, y, finalSize, shapesToUse[Math.floor(Math.random() * shapesToUse.length)]);
-            }
-            animationFrameId = requestAnimationFrame(loop);
-        }
+        document.getElementById('btnFullscreen').onclick = () => { const el = document.getElementById('canvasContainer'); el.requestFullscreen().catch(e=>{}); };
+        document.getElementById('btnExitFS').onclick = () => { if(document.exitFullscreen) document.exitFullscreen(); };
+        document.getElementById('btnDetailMode').onclick = () => { config.evolutionMode = !config.evolutionMode; updateDetailBtnUI(); };
+        function updateDetailBtnUI() { 
+            const b = document.getElementById('btnDetailMode'), g = document.getElementById('abstractionGroup');
+            if(config.evolutionMode) { b.classList.add('active'); b.querySelector('span').innerText = "LIGADO"; g.classList.add('disabled'); document.getElementById('speedVal').innerText = "Auto"; }
+            else { b.classList.remove('active'); b.querySelector('span').innerText = "DESLIGADO"; g.classList.remove('disabled'); }
+        }
+        document.getElementById('timeSelect').onchange = (e) => config.duration = parseInt(e.target.value);
+        document.getElementById('speedSlider').oninput = (e) => { config.paintSpeed = parseInt(e.target.value); if(!config.evolutionMode) document.getElementById('speedVal').innerText = config.paintSpeed > 30 ? "Rápido" : "Normal"; };
+        document.getElementById('abstractionSlider').oninput = (e) => config.abstraction = parseInt(e.target.value);
+        document.querySelectorAll('#shapesContainer input').forEach(cb => { cb.onchange = () => { config.shapes = Array.from(document.querySelectorAll('#shapesContainer input:checked')).map(c => c.value); } });
+        document.getElementById('btnDownload').onclick = () => { const a = document.createElement('a'); a.download = 'art.png'; a.href = canvas.toDataURL(); a.click(); };
+        document.getElementById('btnRandom').onclick = () => { config.currentMode = 'random'; loadImage(`https://picsum.photos/1920/1080`, 0); };
+        document.getElementById('btnToggleSearch').onclick = () => { const p = document.getElementById('searchPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
+        document.getElementById('btnDoSearch').onclick = () => { const val = document.getElementById('searchInput').value; if(val) searchImage(val); };
+        document.getElementById('searchInput').onkeypress = (e) => { if(e.key === 'Enter') { const val = document.getElementById('searchInput').value; if(val) searchImage(val); } };
+        document.getElementById('fileInput').onchange = (e) => { const f = e.target.files[0]; if(f) { config.currentMode = 'upload'; setLoading(true, "Processando..."); const r = new FileReader(); r.onload = (evt) => loadImage(evt.target.result, 0); r.readAsDataURL(f); } };
 
-        function drawShape(x, y, size, s) {
-            ctx.beginPath();
-            if(s === 'circle') { ctx.arc(x, y, size/2, 0, Math.PI*2); ctx.fill(); }
-            else if(s === 'square') { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.random()*Math.PI*0.2); ctx.rect(-size/2, -size/2, size, size); ctx.fill(); ctx.restore(); }
-            else if(s === 'triangle') { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.random()*Math.PI*0.5); const h = size * 0.866; ctx.moveTo(0, -h/2); ctx.lineTo(-size/2, h/2); ctx.lineTo(size/2, h/2); ctx.fill(); ctx.restore(); }
-            else if(s === 'line') { ctx.lineWidth = Math.max(1, size/4); const a = Math.random()*Math.PI*2; ctx.moveTo(x-Math.cos(a)*size, y-Math.sin(a)*size); ctx.lineTo(x+Math.cos(a)*size, y+Math.sin(a)*size); ctx.stroke(); }
-        }
-
-        function drawImageCover(ctx, img, w, h) {
-            const r = Math.max(w / img.width, h / img.height);
-            ctx.drawImage(img, (w - img.width * r) / 2, (h - img.height * r) / 2, img.width * r, img.height * r);
-        }
-        function map(v, a, b, c, d) { return c + ((v-a)/(b-a)) * (d-c); }
-
-        document.getElementById('btnFullscreen').onclick = () => { const el = document.getElementById('canvasContainer'); el.requestFullscreen().catch(e=>{}); };
-        document.getElementById('btnExitFS').onclick = () => { if(document.exitFullscreen) document.exitFullscreen(); };
-        document.getElementById('btnDetailMode').onclick = () => { config.evolutionMode = !config.evolutionMode; updateDetailBtnUI(); };
-        function updateDetailBtnUI() { 
-            const b = document.getElementById('btnDetailMode'), g = document.getElementById('abstractionGroup');
-            if(config.evolutionMode) { b.classList.add('active'); b.querySelector('span').innerText = "ON"; g.classList.add('disabled'); document.getElementById('speedVal').innerText = "Auto"; }
-            else { b.classList.remove('active'); b.querySelector('span').innerText = "OFF"; g.classList.remove('disabled'); }
-        }
-        document.getElementById('timeSelect').onchange = (e) => config.duration = parseInt(e.target.value);
-        document.getElementById('speedSlider').oninput = (e) => { config.paintSpeed = parseInt(e.target.value); if(!config.evolutionMode) document.getElementById('speedVal').innerText = config.paintSpeed > 30 ? "Rápido" : "Normal"; };
-        document.getElementById('abstractionSlider').oninput = (e) => config.abstraction = parseInt(e.target.value);
-        document.querySelectorAll('#shapesContainer input').forEach(cb => { cb.onchange = () => { config.shapes = Array.from(document.querySelectorAll('#shapesContainer input:checked')).map(c => c.value); } });
-        document.getElementById('btnDownload').onclick = () => { const a = document.createElement('a'); a.download = 'art.png'; a.href = canvas.toDataURL(); a.click(); };
-        
-        document.getElementById('btnRandom').onclick = () => { closeMenuOnAction(); config.currentMode = 'random'; loadImage(`https://picsum.photos/1920/1080`, 0); };
-        document.getElementById('btnToggleSearch').onclick = () => { const p = document.getElementById('searchPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
-        document.getElementById('btnDoSearch').onclick = () => { const val = document.getElementById('searchInput').value; if(val) searchImage(val); };
-        document.getElementById('searchInput').onkeypress = (e) => { if(e.key === 'Enter') { const val = document.getElementById('searchInput').value; if(val) searchImage(val); } };
-        
-        document.getElementById('fileInput').onchange = (e) => { 
-            const f = e.target.files[0]; 
-            if(f) { 
-                closeMenuOnAction();
-                config.currentMode = 'upload'; setLoading(true, "Processando..."); 
-                const r = new FileReader(); 
-                r.onload = (evt) => loadImage(evt.target.result, 0); 
-                r.readAsDataURL(f); 
-            } 
-        };
-
-        init();
-    </script>
+        init();
+    </script>
 </body>
 </html>
